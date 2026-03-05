@@ -13,16 +13,19 @@
 export function createCalculator() {
   let value = 0
   const undoStack = []
+  const redoStack = []
 
   return {
     add(n) {
       value += n
       undoStack.push({ type: 'add', value: n })
+      redoStack.length = 0
     },
 
     subtract(n) {
       value -= n
       undoStack.push({ type: 'subtract', value: n })
+      redoStack.length = 0
     },
 
     getValue() {
@@ -31,7 +34,10 @@ export function createCalculator() {
 
     undo() {
       if (undoStack.length === 0) return
+      
       const last = undoStack.pop()
+      redoStack.push(last)
+
       if (last.type === 'add') {
         value -= last.value
         } else {
@@ -39,8 +45,26 @@ export function createCalculator() {
       }
     },
 
+    redo() {
+      if (redoStack.length === 0) return
+
+      const action = redoStack.pop()
+      undoStack.push(action)
+
+      if (action.type === 'add') {
+        value += action.value
+      } else {
+        value -= action.value
+      }
+
+    },
+
     getUndoCount() {
       return undoStack.length
     },
+
+    getRedoCount() {
+      return redoStack.length
+    }
   }
 }
